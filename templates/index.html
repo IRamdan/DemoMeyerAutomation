@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel → JSON Konverter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-animation">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+    
+    <div class="container">
+        <header class="hero-section">
+            <div class="hero-content">
+                <div class="logo-container">
+                    <div class="logo-icon">
+                        <i class="fas fa-file-excel"></i>
+                        <div class="transform-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+                <h1>Excel → JSON Konverter</h1>
+                <p>Verwandle deine Excel-Dateien in sekundenschnelle in perfektes JSON-Format</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Dateien</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">⚡</span>
+                        <span class="stat-label">Schnell</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">🔒</span>
+                        <span class="stat-label">Sicher</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="upload-section glass-morphism">
+                <div class="section-header">
+                    <h2><i class="fas fa-upload"></i> Datei hochladen</h2>
+                    <p>Ziehe deine Excel-Datei hier rein oder klicke zum Auswählen</p>
+                </div>
+                
+                <form id="uploadForm">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="excelFile" name="excel" accept=".xlsx,.xls" required>
+                        <label for="excelFile" class="file-label">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="upload-pulse"></div>
+                            </div>
+                            <span class="upload-text">Datei auswählen oder hier hinziehen</span>
+                            <div class="file-types">
+                                <span class="file-type">.xlsx</span>
+                                <span class="file-type">.xls</span>
+                            </div>
+                        </label>
+                    </div>
+                    <button type="submit" class="convert-btn">
+                        <span class="btn-content">
+                            <i class="fas fa-magic"></i>
+                            <span>Konvertieren</span>
+                        </span>
+                        <div class="btn-shine"></div>
+                    </button>
+                </form>
+            </div>
+
+            <div id="loader" class="loader-section hidden">
+                <div class="loader-content glass-morphism">
+                    <div class="processing-animation">
+                        <div class="file-icon">
+                            <i class="fas fa-file-excel"></i>
+                        </div>
+                        <div class="transform-line">
+                            <div class="transform-particle"></div>
+                            <div class="transform-particle"></div>
+                            <div class="transform-particle"></div>
+                        </div>
+                        <div class="json-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                    </div>
+                    <h3>Magie passiert...</h3>
+                    <p>Deine Excel-Datei wird in JSON verwandelt</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="result" class="result-section glass-morphism hidden">
+                <div class="success-animation">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                
+                <div class="result-header">
+                    <h3><i class="fas fa-sparkles"></i> Erfolgreich konvertiert!</h3>
+                    <div class="file-info">
+                        <span id="fileInfo"></span>
+                    </div>
+                </div>
+                
+                <div class="result-actions">
+                    <button id="downloadBtn" class="action-btn download-btn">
+                        <i class="fas fa-download"></i>
+                        <span>JSON herunterladen</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                    <button id="copyBtn" class="action-btn copy-btn">
+                        <i class="fas fa-copy"></i>
+                        <span>Kopieren</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                    <button id="clearBtn" class="action-btn clear-btn">
+                        <i class="fas fa-refresh"></i>
+                        <span>Neu starten</span>
+                        <div class="btn-ripple"></div>
+                    </button>
+                </div>
+
+                <div class="json-preview">
+                    <div class="preview-header">
+                        <span><i class="fas fa-code"></i> JSON Vorschau</span>
+                        <button id="togglePreview" class="toggle-btn">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="json-container">
+                        <pre id="output"></pre>
+                        <div class="json-overlay">
+                            <div class="line-numbers" id="lineNumbers"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error-section glass-morphism hidden">
+                <div class="error-animation">
+                    <div class="error-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+                <div class="error-content">
+                    <h3>Oops! Etwas ist schiefgelaufen</h3>
+                    <span id="errorMessage"></span>
+                    <button id="retryBtn" class="retry-btn">
+                        <i class="fas fa-redo"></i> Erneut versuchen
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <div class="supported-formats">
+                        <i class="fas fa-file-excel"></i>
+                        <span>Unterstützte Formate: .xlsx, .xls</span>
+                    </div>
+                    <div class="file-size">
+                        <i class="fas fa-weight-hanging"></i>
+                        <span>Maximale Dateigröße: 16MB</span>
+                    </div>
+                </div>
+                <div class="footer-tech">
+                    <span>Powered by</span>
+                    <div class="tech-stack">
+                        <span class="tech-item">Ismail</span>
+                        <span class="tech-item">Pandas</span>
+                        <span class="tech-item">JavaScript</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const output = document.getElementById("output");
+        const loader = document.getElementById("loader");
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+        const fileInput = document.getElementById("excelFile");
+        const uploadText = document.querySelector(".upload-text");
+        
+        let currentData = null;
+        let currentFilename = null;
+
+        // Add entrance animations
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+
+        // Enhanced file drag and drop with visual feedback
+        const fileInputWrapper = document.querySelector(".file-input-wrapper");
+        
+        fileInputWrapper.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            fileInputWrapper.classList.add("drag-over");
+        });
+        
+        fileInputWrapper.addEventListener("dragleave", (e) => {
+            if (!fileInputWrapper.contains(e.relatedTarget)) {
+                fileInputWrapper.classList.remove("drag-over");
+            }
+        });
+        
+        fileInputWrapper.addEventListener("drop", (e) => {
+            e.preventDefault();
+            fileInputWrapper.classList.remove("drag-over");
+            fileInputWrapper.classList.add("file-dropped");
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileLabel(files[0].name);
+            }
+            
+            setTimeout(() => {
+                fileInputWrapper.classList.remove("file-dropped");
+            }, 300);
+        });
+
+        // Enhanced file input change with animation
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                fileInputWrapper.classList.add("file-selected");
+                updateFileLabel(e.target.files[0].name);
+                
+                // Add a small delay for smooth animation
+                setTimeout(() => {
+                    fileInputWrapper.classList.remove("file-selected");
+                }, 500);
+            }
+        });
+
+        function updateFileLabel(filename) {
+            uploadText.innerHTML = `<i class="fas fa-file-excel"></i> ${filename}`;
+        }
+
+        // Enhanced form submission with animations
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            hideAll();
+            showLoader();
+
+            const formData = new FormData();
+            formData.append("excel", fileInput.files[0]);
+
+            try {
+                const response = await fetch("/convert", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const jsonResponse = await response.json();
+
+                if (jsonResponse.success) {
+                    currentData = jsonResponse.data;
+                    currentFilename = jsonResponse.file_info.filename;
+                    
+                    // Display file info with animation
+                    const fileInfo = jsonResponse.file_info;
+                    document.getElementById("fileInfo").textContent = 
+                        `${fileInfo.rows} Zeilen • ${fileInfo.columns} Spalten • ${fileInfo.filename}`;
+                    
+                    // Display JSON with syntax highlighting
+                    const jsonString = JSON.stringify(jsonResponse.data, null, 2);
+                    displayJsonWithHighlight(jsonString);
+                    
+                    setTimeout(() => {
+                        hideLoader();
+                        showResult();
+                    }, 1500);
+                } else {
+                    setTimeout(() => {
+                        hideLoader();
+                        showError(jsonResponse.error);
+                    }, 1000);
+                }
+            } catch (err) {
+                setTimeout(() => {
+                    hideLoader();
+                    showError("Fehler beim Hochladen oder Konvertieren der Datei!");
+                }, 1000);
+            }
+        });
+
+        function displayJsonWithHighlight(jsonString) {
+            // Simple JSON syntax highlighting
+            const highlighted = jsonString
+                .replace(/(".*?"):/g, '<span class="json-key">$1</span>:')
+                .replace(/: (".*?")/g, ': <span class="json-string">$1</span>')
+                .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+                .replace(/: (true|false|null)/g, ': <span class="json-boolean">$1</span>');
+            
+            output.innerHTML = highlighted;
+            
+            // Generate line numbers
+            const lines = jsonString.split('\n');
+            const lineNumbers = document.getElementById('lineNumbers');
+            lineNumbers.innerHTML = lines.map((_, i) => `<span>${i + 1}</span>`).join('');
+        }
+
+        // Enhanced button interactions with ripple effects
+        function addRippleEffect(button, event) {
+            const ripple = button.querySelector('.btn-ripple');
+            if (!ripple) return;
+            
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple-active');
+            
+            setTimeout(() => {
+                ripple.classList.remove('ripple-active');
+            }, 600);
+        }
+
+        // Enhanced download functionality
+        document.getElementById("downloadBtn").addEventListener("click", async (e) => {
+            if (!currentData) return;
+            
+            addRippleEffect(e.currentTarget, e);
+            
+            try {
+                const response = await fetch("/download", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: currentData,
+                        filename: currentFilename
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const blob = new Blob([result.json_content], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = result.filename.replace(/\.[^/.]+$/, "") + ".json";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    // Show success feedback
+                    showToast("Datei erfolgreich heruntergeladen!", "success");
+                }
+            } catch (err) {
+                showError("Fehler beim Herunterladen der Datei!");
+            }
+        });
+
+        // Enhanced copy functionality
+        document.getElementById("copyBtn").addEventListener("click", async (e) => {
+            addRippleEffect(e.currentTarget, e);
+            
+            try {
+                await navigator.clipboard.writeText(output.textContent);
+                const btn = e.currentTarget;
+                const icon = btn.querySelector("i");
+                const text = btn.querySelector("span");
+                
+                icon.className = "fas fa-check";
+                text.textContent = "Kopiert!";
+                btn.style.background = "var(--success-color)";
+                
+                setTimeout(() => {
+                    icon.className = "fas fa-copy";
+                    text.textContent = "Kopieren";
+                    btn.style.background = "";
+                }, 2000);
+                
+                showToast("JSON in die Zwischenablage kopiert!", "success");
+            } catch (err) {
+                showError("Fehler beim Kopieren!");
+            }
+        });
+
+        // Enhanced clear functionality
+        document.getElementById("clearBtn").addEventListener("click", (e) => {
+            addRippleEffect(e.currentTarget, e);
+            
+            hideAll();
+            form.reset();
+            uploadText.innerHTML = 'Datei auswählen oder hier hinziehen';
+            fileInputWrapper.classList.remove("file-selected");
+            currentData = null;
+            currentFilename = null;
+            
+            // Add a nice fade out effect
+            setTimeout(() => {
+                document.querySelector('.upload-section').classList.add('reset-animation');
+                setTimeout(() => {
+                    document.querySelector('.upload-section').classList.remove('reset-animation');
+                }, 500);
+            }, 100);
+        });
+
+        // Toggle preview with smooth animation
+        document.getElementById("togglePreview").addEventListener("click", () => {
+            const preview = document.querySelector('.json-container');
+            const btn = document.getElementById("togglePreview");
+            const icon = btn.querySelector("i");
+            
+            if (preview.classList.contains("collapsed")) {
+                preview.classList.remove("collapsed");
+                icon.className = "fas fa-chevron-down";
+            } else {
+                preview.classList.add("collapsed");
+                icon.className = "fas fa-chevron-up";
+            }
+        });
+
+        // Retry button
+        document.getElementById("retryBtn").addEventListener("click", () => {
+            hideAll();
+            document.querySelector('.upload-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Enhanced show/hide functions with animations
+        function showLoader() {
+            loader.classList.remove("hidden");
+            setTimeout(() => {
+                loader.classList.add("show");
+            }, 50);
+        }
+
+        function hideLoader() {
+            loader.classList.remove("show");
+            setTimeout(() => {
+                loader.classList.add("hidden");
+            }, 300);
+        }
+
+        function showResult() {
+            result.classList.remove("hidden");
+            setTimeout(() => {
+                result.classList.add("show");
+            }, 50);
+        }
+
+        function showError(message) {
+            document.getElementById("errorMessage").textContent = message;
+            error.classList.remove("hidden");
+            setTimeout(() => {
+                error.classList.add("show");
+            }, 50);
+        }
+
+        function hideAll() {
+            [result, error, loader].forEach(el => {
+                el.classList.remove("show");
+                setTimeout(() => {
+                    el.classList.add("hidden");
+                }, 300);
+            });
+        }
+    </script>
+</body>
+</html>
